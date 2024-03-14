@@ -11,13 +11,12 @@ import (
 
 func TestMain(m *testing.M) {
 	fixtures.PostgresInit()
-	//	TestPostgresTestContainer(&testing.T{})
+	defer fixtures.PostgresDie()
+
+	TestPostgresTestContainer(&testing.T{})
 }
 
 func TestPostgresTestContainer(t *testing.T) {
-	fixtures.PostgresInit()
-	defer fixtures.PostgresDie()
-
 	integration.SaveUser(context.Background())
 	user := integration.GetUser(context.Background())
 
