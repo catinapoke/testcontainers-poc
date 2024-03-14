@@ -14,7 +14,6 @@ func SaveUser(ctx context.Context) {
 						VALUES($1, $2);`)
 
 	container := fixtures.PostgresContainer
-	//ctx = container.Ctx
 
 	dbURL, err := container.ConnectionString(ctx)
 	if err != nil {

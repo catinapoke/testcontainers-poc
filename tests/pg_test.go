@@ -9,10 +9,10 @@ import (
 	"testcontainers/tests/integration"
 )
 
-//func TestMain(m *testing.M) {
-//	fixtures.PostgresInit()
-//	TestPostgresTestContainer(&testing.T{})
-//}
+func TestMain(m *testing.M) {
+	fixtures.PostgresInit()
+	//	TestPostgresTestContainer(&testing.T{})
+}
 
 func TestPostgresTestContainer(t *testing.T) {
 	fixtures.PostgresInit()
