@@ -3,17 +3,22 @@ package fixtures
 import (
 	"context"
 	"log"
+	"path/filepath"
 
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-var GooseContainer testcontainers.Container
+var GooseLocalContainer testcontainers.Container
 
-func GooseInit() {
+func GooseLocalInit() {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image: "gomicro/goose:latest",
+		FromDockerfile: testcontainers.FromDockerfile{
+			Context: filepath.Join(".", "docker", "goose"),
+		},
+		WaitingFor: wait.ForHealthCheck(),
 	}
 	var err error
 	GooseContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -24,14 +29,14 @@ func GooseInit() {
 		log.Fatal(err)
 	}
 
-	_, _, err = GooseContainer.Exec(ctx, []string{"goose", "migrations", "up"})
-	if err != nil {
-		log.Println("its here")
-		log.Fatal(err)
-	}
+	//_, _, err = GooseContainer.Exec(ctx, []string{"goose", "migrations", "up"})
+	//if err != nil {
+	//	log.Println("its here")
+	//	log.Fatal(err)
+	//}
 }
 
-func GooseDie() {
+func GooseLocalDie() {
 	if err := GooseContainer.Terminate(context.Background()); err != nil {
 		log.Fatalf("failed to terminate container: %s", err)
 	}

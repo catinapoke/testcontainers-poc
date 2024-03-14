@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"log/slog"
 	"testing"
 
@@ -8,12 +9,17 @@ import (
 	"testcontainers/tests/integration"
 )
 
+//func TestMain(m *testing.M) {
+//	fixtures.PostgresInit()
+//	TestPostgresTestContainer(&testing.T{})
+//}
+
 func TestPostgresTestContainer(t *testing.T) {
-	ctx := fixtures.PostgresInit()
+	fixtures.PostgresInit()
 	defer fixtures.PostgresDie()
 
-	integration.SaveUser(ctx)
-	user := integration.GetUser(ctx)
+	integration.SaveUser(context.Background())
+	user := integration.GetUser(context.Background())
 
 	if user.Age == 27 {
 		slog.Info("success")

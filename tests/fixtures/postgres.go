@@ -2,16 +2,24 @@ package fixtures
 
 import (
 	"context"
+	"log"
+	"time"
+
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"log"
-	"time"
 )
 
 var PostgresContainer *postgres.PostgresContainer
 
-func PostgresInit() context.Context {
+var PostgresContainerNew PGNew
+
+type PGNew struct {
+	Container *postgres.PostgresContainer
+	Ctx       context.Context
+}
+
+func PostgresInit() {
 	ctx := context.Background()
 
 	dbName := "users"
@@ -19,7 +27,7 @@ func PostgresInit() context.Context {
 	dbPassword := "password"
 
 	var err error
-	PostgresContainer, err = postgres.RunContainer(ctx,
+	PostgresContainerNew.Container, err = postgres.RunContainer(ctx,
 		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
 		postgres.WithInitScripts("../migrations/0001_create_users_table.sql"),
 		postgres.WithDatabase(dbName),
@@ -34,11 +42,11 @@ func PostgresInit() context.Context {
 		log.Fatalf("failed to start container: %s", err)
 	}
 
-	return ctx
+	PostgresContainerNew.Ctx = ctx
 }
 
 func PostgresDie() {
-	if err := PostgresContainer.Terminate(context.Background()); err != nil {
+	if err := PostgresContainerNew.Container.Terminate(context.Background()); err != nil {
 		log.Fatalf("failed to terminate container: %s", err)
 	}
 }
