@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	"testcontainers/tests/fixtures"
@@ -14,14 +13,13 @@ func SaveUser(ctx context.Context) {
 	query := fmt.Sprintf(`INSERT INTO users (name, age)
 						VALUES($1, $2);`)
 
-	container := fixtures.PostgresContainerNew
+	container := fixtures.PostgresContainer
 	//ctx = container.Ctx
 
-	dbURL, err := container.Container.ConnectionString(ctx)
+	dbURL, err := container.ConnectionString(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	slog.Warn(dbURL)
 
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {

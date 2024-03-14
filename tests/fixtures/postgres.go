@@ -12,13 +12,6 @@ import (
 
 var PostgresContainer *postgres.PostgresContainer
 
-var PostgresContainerNew PGNew
-
-type PGNew struct {
-	Container *postgres.PostgresContainer
-	Ctx       context.Context
-}
-
 func PostgresInit() {
 	ctx := context.Background()
 
@@ -27,7 +20,7 @@ func PostgresInit() {
 	dbPassword := "password"
 
 	var err error
-	PostgresContainerNew.Container, err = postgres.RunContainer(ctx,
+	PostgresContainer, err = postgres.RunContainer(ctx,
 		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
 		postgres.WithInitScripts("../migrations/0001_create_users_table.sql"),
 		postgres.WithDatabase(dbName),
@@ -41,12 +34,10 @@ func PostgresInit() {
 	if err != nil {
 		log.Fatalf("failed to start container: %s", err)
 	}
-
-	PostgresContainerNew.Ctx = ctx
 }
 
 func PostgresDie() {
-	if err := PostgresContainerNew.Container.Terminate(context.Background()); err != nil {
+	if err := PostgresContainer.Terminate(context.Background()); err != nil {
 		log.Fatalf("failed to terminate container: %s", err)
 	}
 }

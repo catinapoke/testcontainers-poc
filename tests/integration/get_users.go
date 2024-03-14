@@ -13,10 +13,9 @@ func GetUser(ctx context.Context) User {
 	query := fmt.Sprintf(`select name, age from users
 						where name = $1`)
 
-	container := fixtures.PostgresContainerNew
-	ctx = container.Ctx
+	container := fixtures.PostgresContainer
 
-	dbURL, err := container.Container.ConnectionString(ctx)
+	dbURL, err := container.ConnectionString(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
