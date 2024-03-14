@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 	fixtures.PostgresInit()
 	defer fixtures.PostgresDie()
 
-	TestPostgresTestContainer(&testing.T{})
+	m.Run()
 }
 
 func TestPostgresTestContainer(t *testing.T) {
