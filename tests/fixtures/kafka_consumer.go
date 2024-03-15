@@ -2,9 +2,7 @@ package fixtures
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
-	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/pkg/errors"
@@ -31,24 +29,4 @@ func InitNativeKafkaConsumer(
 	slog.Info(fmt.Sprintf("kafka consumer %s created", clientID))
 
 	return c, nil
-}
-
-func Consume(broker string) *kafka.Message {
-	cons, err := InitNativeKafkaConsumer("hu", broker, "10000")
-	if err != nil {
-		log.Fatal("InitNativeKafkaConsumer", err)
-	}
-	defer cons.Close()
-
-	err = cons.Subscribe("jeppa", nil)
-	if err != nil {
-		log.Fatal("subscribe", err)
-	}
-
-	res, err := cons.ReadMessage(time.Second * 100)
-	if err != nil {
-		log.Fatal("read message", err)
-	}
-
-	return res
 }

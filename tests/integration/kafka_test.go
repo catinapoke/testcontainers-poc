@@ -7,11 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
+	"testcontainers/tests/helpers"
+)
+
+const (
+	topic   = "jeppa"
+	key     = "hui"
+	message = "bolshoy"
 )
 
 type KafkaTests struct {
@@ -42,32 +47,7 @@ func (*KafkaTests) TestKafkaTestContainer() {
 	}
 	defer prod.Close()
 
-	headers := []kafka.Header{
-		{
-			Key: "DateAdd", Value: []byte(time.Now().Format(time.RFC3339Nano)),
-		},
-		{
-			Key: "MessageId", Value: []byte(uuid.NewString()),
-		},
-	}
-
-	message := "hui"
-	messageJson, _ := json.Marshal(message)
-
-	key := "balshoy"
-	keyJson, _ := json.Marshal(key)
-
-	topic := "jeppa"
-
-	msg := kafka.Message{
-		TopicPartition: kafka.TopicPartition{
-			Topic:     &topic,
-			Partition: kafka.PartitionAny,
-		},
-		Value:   messageJson,
-		Key:     keyJson,
-		Headers: headers,
-	}
+	msg := helpers.MakeMsg(topic, key, message)
 
 	prod.Produce(&msg, nil)
 
@@ -93,5 +73,5 @@ func (*KafkaTests) TestKafkaTestContainer() {
 		log.Fatal("unmarshall error", err)
 	}
 
-	assert.Equal(&testing.T{}, resString, "balshoy")
+	assert.Equal(&testing.T{}, resString, key)
 }

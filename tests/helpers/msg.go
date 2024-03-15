@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func MakeMsg() kafka.Message {
+func MakeMsg(topic, key, message string) kafka.Message {
 	headers := []kafka.Header{
 		{
 			Key: "DateAdd", Value: []byte(time.Now().Format(time.RFC3339Nano)),
@@ -18,13 +18,9 @@ func MakeMsg() kafka.Message {
 		},
 	}
 
-	message := "hui"
 	messageJson, _ := json.Marshal(message)
 
-	key := "balshoy"
 	keyJson, _ := json.Marshal(key)
-
-	topic := "jeppa"
 
 	msg := kafka.Message{
 		TopicPartition: kafka.TopicPartition{

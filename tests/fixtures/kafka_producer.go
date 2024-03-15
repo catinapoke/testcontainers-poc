@@ -2,11 +2,9 @@ package fixtures
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"testcontainers/tests/helpers"
 )
 
 func InitNativeKafkaProducer(
@@ -32,16 +30,4 @@ func InitNativeKafkaProducer(
 	slog.Info(fmt.Sprintf("kafka producer %s created", clientID))
 
 	return p, nil
-}
-
-func Produce(broker string) {
-	prod, err := InitNativeKafkaProducer("hu", broker, "0", 10)
-	if err != nil {
-		log.Fatal("InitNativeKafkaProducer", err)
-	}
-	defer prod.Close()
-
-	msg := helpers.MakeMsg()
-
-	prod.Produce(&msg, nil)
 }
