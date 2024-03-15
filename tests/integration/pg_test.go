@@ -1,4 +1,4 @@
-package tests
+package integration
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"testcontainers/tests/fixtures"
-	"testcontainers/tests/integration"
+	"testcontainers/tests/storage"
 )
 
 func TestMain(m *testing.M) {
@@ -17,8 +17,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestPostgresTestContainer(t *testing.T) {
-	integration.SaveUser(context.Background())
-	user := integration.GetUser(context.Background())
+	storage.SaveUser(context.Background())
+	user := storage.GetUser(context.Background())
 
 	if user.Age == 27 {
 		slog.Info("success")

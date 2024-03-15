@@ -1,4 +1,4 @@
-package integration
+package storage
 
 type User struct {
 	Name string
