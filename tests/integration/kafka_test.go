@@ -35,6 +35,9 @@ func TestKafkaTests(t *testing.T) {
 	suite.Run(t, new(KafkaTests))
 }
 
+// переписать на t.Error или подумать, как сделать, что бы тест стал Fail, если будет ошибка
+// уверен, что достаточно просто возвращать ошибку
+// потому что все функции внутри Suite - становятся тестами при запуске
 func (*KafkaTests) TestKafkaTestContainer() {
 	ctx := context.Background()
 	brokers, err := fixtures.KafkaContainer.Brokers(ctx)
@@ -51,6 +54,9 @@ func (*KafkaTests) TestKafkaTestContainer() {
 
 	prod.Produce(&msg, nil)
 
+	// думаю, что это можно вынести куда то, где мы "на фоне" прочитаем из кафки
+	// и запишем в бд
+	// а в этом коде чуть ниже мы просто проверим, есть ли запись в БД
 	cons, err := fixtures.InitNativeKafkaConsumer("hu", brokers[0], "10000")
 	if err != nil {
 		log.Fatal("InitNativeKafkaConsumer", err)
