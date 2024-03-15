@@ -5,18 +5,28 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/storage"
 )
 
-func TestMain(m *testing.M) {
-	fixtures.PostgresInit()
-	defer fixtures.PostgresDie()
-
-	m.Run()
+type IntegrationTests struct {
+	suite.Suite
 }
 
-func TestPostgresTestContainer(t *testing.T) {
+func (*IntegrationTests) SetupTest() {
+	fixtures.PostgresInit()
+}
+
+func (*IntegrationTests) TearDownTest() {
+	fixtures.PostgresDie()
+}
+
+func TestIntegrationTests(t *testing.T) {
+	suite.Run(t, new(IntegrationTests))
+}
+
+func (*IntegrationTests) TestPostgresTestContainer() {
 	storage.SaveUser(context.Background())
 	user := storage.GetUser(context.Background())
 
