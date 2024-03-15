@@ -10,23 +10,23 @@ import (
 	"testcontainers/tests/storage"
 )
 
-type IntegrationTests struct {
+type PGTests struct {
 	suite.Suite
 }
 
-func (*IntegrationTests) SetupTest() {
+func (*PGTests) SetupTest() {
 	fixtures.PostgresInit()
 }
 
-func (*IntegrationTests) TearDownTest() {
+func (*PGTests) TearDownTest() {
 	fixtures.PostgresDie()
 }
 
-func TestIntegrationTests(t *testing.T) {
-	suite.Run(t, new(IntegrationTests))
+func TestPGTests(t *testing.T) {
+	suite.Run(t, new(PGTests))
 }
 
-func (*IntegrationTests) TestPostgresTestContainer() {
+func (*PGTests) TestPostgresTestContainer() {
 	storage.SaveUser(context.Background())
 	user := storage.GetUser(context.Background())
 
