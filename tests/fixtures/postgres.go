@@ -22,7 +22,7 @@ func PostgresInit() {
 	var err error
 	PostgresContainer, err = postgres.RunContainer(ctx,
 		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
-		postgres.WithInitScripts("../migrations/0001_create_users_table.sql"),
+		postgres.WithInitScripts("../../migrations/0001_create_users_table.sql"),
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
