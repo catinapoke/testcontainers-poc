@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func MakeMsg(topic, key, message string) kafka.Message {
+func MakeMsg(topic, key string, message interface{}) kafka.Message {
 	headers := []kafka.Header{
 		{
 			Key: "DateAdd", Value: []byte(time.Now().Format(time.RFC3339Nano)),

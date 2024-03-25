@@ -32,7 +32,7 @@ func SaveUser(ctx context.Context) {
 	}
 }
 
-func SaveUser2(ctx context.Context) {
+func SaveUserWithParams(ctx context.Context, name string, age int64) {
 	query := fmt.Sprintf(`INSERT INTO users (name, age)
 						VALUES($1, $2);`)
 
@@ -48,7 +48,7 @@ func SaveUser2(ctx context.Context) {
 	}
 	defer conn.Close(context.Background())
 
-	_, err = conn.Exec(ctx, query, "nikita", 28)
+	_, err = conn.Exec(ctx, query, name, age)
 	if err != nil {
 		log.Println(err)
 	}

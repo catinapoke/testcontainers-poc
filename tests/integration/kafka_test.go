@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/helpers"
+	"testcontainers/tests/storage"
 )
 
 const (
@@ -25,10 +25,12 @@ type KafkaTests struct {
 
 func (*KafkaTests) SetupTest() {
 	fixtures.KafkaInit()
+	fixtures.PostgresInit()
 }
 
 func (*KafkaTests) TearDownTest() {
 	fixtures.KafkaDie()
+	fixtures.PostgresDie()
 }
 
 func TestKafkaTests(t *testing.T) {
@@ -38,7 +40,7 @@ func TestKafkaTests(t *testing.T) {
 // переписать на t.Error или подумать, как сделать, что бы тест стал Fail, если будет ошибка
 // уверен, что достаточно просто возвращать ошибку
 // потому что все функции внутри Suite - становятся тестами при запуске
-func (*KafkaTests) TestKafkaTestContainer() {
+func (k *KafkaTests) TestKafkaTestContainer() {
 	ctx := context.Background()
 	brokers, err := fixtures.KafkaContainer.Brokers(ctx)
 	if err != nil {
@@ -50,7 +52,8 @@ func (*KafkaTests) TestKafkaTestContainer() {
 	}
 	defer prod.Close()
 
-	msg := helpers.MakeMsg(topic, key, message)
+	//msg := helpers.MakeMsg(topic, key, message)
+	msg := helpers.MakeMsg(topic, key, storage.User{Name: "Samik", Age: 27})
 
 	prod.Produce(&msg, nil)
 
@@ -73,11 +76,14 @@ func (*KafkaTests) TestKafkaTestContainer() {
 		log.Fatal("read message", err)
 	}
 
-	var resString string
-	err = json.Unmarshal(res.Key, &resString)
+	var fromKafka storage.User
+	err = json.Unmarshal(res.Value, &fromKafka)
 	if err != nil {
 		log.Fatal("unmarshall error", err)
 	}
 
-	assert.Equal(&testing.T{}, resString, key)
+	storage.SaveUserWithParams(ctx, fromKafka.Name, fromKafka.Age)
+	fromDB := storage.GetUserByName(ctx, fromKafka.Name)
+
+	k.Suite.Equal(fromKafka, fromDB)
 }

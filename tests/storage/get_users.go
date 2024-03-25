@@ -35,7 +35,7 @@ func GetUser(ctx context.Context) User {
 	return user
 }
 
-func GetUser2(ctx context.Context) User {
+func GetUserByName(ctx context.Context, name string) User {
 	query := fmt.Sprintf(`select name, age from users
 						where name = $1`)
 
@@ -52,7 +52,7 @@ func GetUser2(ctx context.Context) User {
 	defer conn.Close(context.Background())
 
 	var user User
-	err = conn.QueryRow(ctx, query, "nikita").Scan(&user.Name, &user.Age)
+	err = conn.QueryRow(ctx, query, name).Scan(&user.Name, &user.Age)
 	if err != nil {
 		log.Println(err)
 	}
