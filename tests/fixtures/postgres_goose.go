@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -13,18 +14,30 @@ var GooseContainer testcontainers.Container
 func PostgresGooseInit(cfg PostgresConfig) {
 	ctx := context.Background()
 
-	dbURL, err := PostgresContainer.ConnectionString(ctx)
+	//dbUrl, err := PostgresContainer.ConnectionString(ctx)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	containerPort, err := PostgresContainer.MappedPort(ctx, "5432/tcp")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	host, err := PostgresContainer.Host(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, containerPort.Port(), "user", "password", "users")
+
 	req := testcontainers.ContainerRequest{
 		Image:      "ghcr.io/kukymbr/goose-docker:3.19.2",
-		WaitingFor: wait.ForExit(),
+		WaitingFor: wait.ForHealthCheck(),
 		Env: map[string]string{
 			"GOOSE_COMMAND":  "up",
 			"GOOSE_DRIVER":   "postgres",
-			"GOOSE_DBSTRING": dbURL,
+			"GOOSE_DBSTRING": dbstring,
 		},
 		Files: []testcontainers.ContainerFile{
 			{
