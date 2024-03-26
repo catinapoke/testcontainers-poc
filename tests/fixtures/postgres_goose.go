@@ -31,7 +31,7 @@ func PostgresGooseInit(cfg PostgresConfig) {
 	}
 
 	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, containerPort.Port(), "user", "password", "users")
-
+	n := Network.Name
 	req := testcontainers.ContainerRequest{
 		Image:      "ghcr.io/kukymbr/goose-docker:3.19.2",
 		WaitingFor: wait.ForHealthCheck(),
@@ -39,6 +39,10 @@ func PostgresGooseInit(cfg PostgresConfig) {
 			"GOOSE_COMMAND":  "up",
 			"GOOSE_DRIVER":   "postgres",
 			"GOOSE_DBSTRING": dbstring,
+		},
+		Networks: []string{n},
+		NetworkAliases: map[string][]string{
+			Network.Name: {"alias1", "alias2", "alias3"},
 		},
 		Files: []testcontainers.ContainerFile{
 			{

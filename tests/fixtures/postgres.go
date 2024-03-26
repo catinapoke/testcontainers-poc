@@ -7,6 +7,7 @@ import (
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -28,6 +29,7 @@ func PostgresInit(cfg PostgresConfig) {
 		postgres.WithDatabase(cfg.Name),
 		postgres.WithUsername(cfg.User),
 		postgres.WithPassword(cfg.Password),
+		network.WithNetwork([]string{"alias1", "alias2", "alias3"}, Network),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).

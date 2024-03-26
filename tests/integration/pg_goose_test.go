@@ -16,6 +16,7 @@ type PGGooseTests struct {
 }
 
 func (*PGGooseTests) SetupTest() {
+	fixtures.NetworkInit()
 	fixtures.PostgresInit(fixtures.PostgresConfig{
 		Name:     "users",
 		User:     "user",
@@ -30,6 +31,7 @@ func (*PGGooseTests) SetupTest() {
 
 func (*PGGooseTests) TearDownTest() {
 	fixtures.PostgresDie()
+	fixtures.NetworkDie()
 }
 
 func TestPGGooseTests(t *testing.T) {
