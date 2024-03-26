@@ -37,6 +37,18 @@ func TestPGGooseTests(t *testing.T) {
 }
 
 func (p *PGGooseTests) TestPostgresTestContainer() {
+	//a, err := fixtures.PostgresContainer.ConnectionString(context.Background())
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//slog.Info(a)
+
+	//fixtures.PostgresGooseInit(fixtures.PostgresConfig{
+	//	Name:     "users",
+	//	User:     "user",
+	//	Password: "password",
+	//})
+
 	time.Sleep(time.Minute)
 	storage.SaveUser(context.Background())
 	user := storage.GetUser(context.Background())

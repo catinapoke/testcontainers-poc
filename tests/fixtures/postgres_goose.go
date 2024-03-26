@@ -13,8 +13,9 @@ var GooseContainer testcontainers.Container
 
 func PostgresGooseInit(cfg PostgresConfig) {
 	ctx := context.Background()
+	var err error
 
-	//dbUrl, err := PostgresContainer.ConnectionString(ctx)
+	//dbstring, err := PostgresContainer.ConnectionString(ctx)
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
@@ -51,9 +52,9 @@ func PostgresGooseInit(cfg PostgresConfig) {
 		},
 	}
 
-	//var err error
 	GooseContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
+		Started:          true,
 	})
 	if err != nil {
 		log.Fatal(err)
