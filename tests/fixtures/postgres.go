@@ -12,20 +12,22 @@ import (
 
 var PostgresContainer *postgres.PostgresContainer
 
-func PostgresInit() {
-	ctx := context.Background()
+type PostgresConfig struct {
+	Name     string
+	User     string
+	Password string
+}
 
-	dbName := "users"
-	dbUser := "user"
-	dbPassword := "password"
+func PostgresInit(cfg PostgresConfig) {
+	ctx := context.Background()
 
 	var err error
 	PostgresContainer, err = postgres.RunContainer(ctx,
 		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
-		postgres.WithInitScripts("../../migrations/0001_create_users_table.sql"),
-		postgres.WithDatabase(dbName),
-		postgres.WithUsername(dbUser),
-		postgres.WithPassword(dbPassword),
+		// postgres.WithInitScripts("../../migrations/0001_create_users_table.sql"),
+		postgres.WithDatabase(cfg.Name),
+		postgres.WithUsername(cfg.User),
+		postgres.WithPassword(cfg.Password),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).

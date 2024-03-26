@@ -23,18 +23,29 @@ type KafkaTests struct {
 	suite.Suite
 }
 
-func (*KafkaTests) SetupTest() {
+func (*KafkaTests) SetupSuite() {
 	fixtures.KafkaInit()
-	fixtures.PostgresInit()
+	fixtures.PostgresInit(fixtures.PostgresConfig{
+		Name:     "users",
+		User:     "user",
+		Password: "password",
+	})
 }
 
-func (*KafkaTests) TearDownTest() {
+func (*KafkaTests) TearDownSuite() {
 	fixtures.KafkaDie()
 	fixtures.PostgresDie()
 }
 
 func TestKafkaTests(t *testing.T) {
 	suite.Run(t, new(KafkaTests))
+}
+
+func (k *KafkaTests) TestPostgresTestContainer() {
+	storage.SaveUser(context.Background())
+	user := storage.GetUser(context.Background())
+
+	k.Suite.Equal(int64(27), user.Age)
 }
 
 // переписать на t.Error или подумать, как сделать, что бы тест стал Fail, если будет ошибка
