@@ -25,13 +25,13 @@ func PostgresGooseInit(cfg PostgresConfig) {
 		log.Fatal(err)
 	}
 
-	host, err := PostgresContainer.Host(ctx)
+	host, err := PostgresContainer.Name(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, containerPort.Port(), "user", "password", "users")
-	n := Network.Name
+	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host[1:], containerPort.Port(), "user", "password", "users")
+
 	req := testcontainers.ContainerRequest{
 		Image:      "ghcr.io/kukymbr/goose-docker:3.19.2",
 		WaitingFor: wait.ForHealthCheck(),
@@ -40,7 +40,7 @@ func PostgresGooseInit(cfg PostgresConfig) {
 			"GOOSE_DRIVER":   "postgres",
 			"GOOSE_DBSTRING": dbstring,
 		},
-		Networks: []string{n},
+		Networks: []string{Network.Name},
 		NetworkAliases: map[string][]string{
 			Network.Name: {"alias1", "alias2", "alias3"},
 		},
