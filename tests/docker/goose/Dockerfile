@@ -1,6 +1,5 @@
 FROM golang:bullseye
 
-RUN go install https://github.com/pressly/goose
-ADD migrations .
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-ENTRYPOINT ["goose"]
+CMD goose up

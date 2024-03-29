@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/storage"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type PGGooseTests struct {
@@ -16,17 +17,16 @@ type PGGooseTests struct {
 }
 
 func (*PGGooseTests) SetupTest() {
+	cfg := fixtures.PostgresConfig{
+		Name:     "postgres",
+		User:     "postgres",
+		Password: "postgres",
+	}
+
 	fixtures.NetworkInit()
-	fixtures.PostgresInit(fixtures.PostgresConfig{
-		Name:     "users",
-		User:     "user",
-		Password: "password",
-	})
-	fixtures.PostgresGooseInit(fixtures.PostgresConfig{
-		Name:     "users",
-		User:     "user",
-		Password: "password",
-	})
+	fixtures.PostgresInitGeneric(cfg) //PostgresInit
+	// fixtures.InitGooseFromDockerfile(context.TODO(), fixtures.Network, cfg)
+	fixtures.InitPostgresTest(cfg)
 }
 
 func (*PGGooseTests) TearDownTest() {
@@ -39,17 +39,6 @@ func TestPGGooseTests(t *testing.T) {
 }
 
 func (p *PGGooseTests) TestPostgresTestContainer() {
-	//a, err := fixtures.PostgresContainer.ConnectionString(context.Background())
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//slog.Info(a)
-
-	//fixtures.PostgresGooseInit(fixtures.PostgresConfig{
-	//	Name:     "users",
-	//	User:     "user",
-	//	Password: "password",
-	//})
 
 	time.Sleep(time.Minute)
 	storage.SaveUser(context.Background())
