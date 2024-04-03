@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"testing"
-	"time"
 
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/storage"
@@ -18,19 +17,22 @@ type PGGooseTests struct {
 
 func (*PGGooseTests) SetupTest() {
 	cfg := fixtures.PostgresConfig{
-		Name:     "postgres",
+		DbName:   "postgres",
 		User:     "postgres",
 		Password: "postgres",
+		Port:     "5432/tcp",
 	}
 
 	fixtures.NetworkInit()
-	fixtures.PostgresInitGeneric(cfg) //PostgresInit
+	fixtures.PostgresInit(cfg) //PostgresInit
 	// fixtures.InitGooseFromDockerfile(context.TODO(), fixtures.Network, cfg)
+	fixtures.InitPostgresGoose(cfg)
 	fixtures.InitPostgresTest(cfg)
 }
 
 func (*PGGooseTests) TearDownTest() {
 	fixtures.PostgresDie()
+	fixtures.GooseContainer.Terminate(context.TODO())
 	fixtures.NetworkDie()
 }
 
@@ -39,8 +41,6 @@ func TestPGGooseTests(t *testing.T) {
 }
 
 func (p *PGGooseTests) TestPostgresTestContainer() {
-
-	time.Sleep(time.Minute)
 	storage.SaveUser(context.Background())
 	user := storage.GetUser(context.Background())
 

@@ -22,18 +22,13 @@ func InitPostgresGoose(cfg PostgresConfig) {
 	ctx := context.Background()
 	var err error
 
-	containerPort, err := PostgresContainer.MappedPort(ctx, "5432/tcp")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", "postgres_gavna", containerPort.Port(), cfg.User, cfg.Password, cfg.Name)
+	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", PostgresAlias, cfg.Port.Port(), cfg.User, cfg.Password, cfg.DbName)
 
 	req := testcontainers.ContainerRequest{
 		Image:      "ghcr.io/kukymbr/goose-docker:3.19.2",
-		WaitingFor: wait.ForHealthCheck(),
+		WaitingFor: wait.ForLog("successfully migrated database"),
 		Env: map[string]string{
-			"GOOSE_COMMAND":  "status",
+			"GOOSE_COMMAND":  "up",
 			"GOOSE_DRIVER":   "postgres",
 			"GOOSE_DBSTRING": dbstring,
 		},
@@ -71,7 +66,7 @@ func RunGooseStatusManual(cfg PostgresConfig) {
 		log.Fatal(err)
 	}
 
-	db, err := InitPgDb(ctx, "localhost", cfg.User, cfg.Password, containerPort.Port(), cfg.Name, 5, 10)
+	db, err := InitPgDb(ctx, "localhost", cfg.User, cfg.Password, containerPort.Port(), cfg.DbName, 5, 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +83,7 @@ func InitGooseFromDockerfile(ctx context.Context, network *testcontainers.Docker
 		log.Fatal(err)
 	}
 
-	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", "postgres_gavna", containerPort.Port(), cfg.User, cfg.Password, cfg.Name)
+	dbstring := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", "postgres_gavna", containerPort.Port(), cfg.User, cfg.Password, cfg.DbName)
 
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: testcontainers.FromDockerfile{

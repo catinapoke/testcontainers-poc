@@ -26,33 +26,35 @@ func main() {
 		Password: "postgres",
 	}
 
-	port, _ := os.LookupEnv("POSTGRES_PORT")
-	host, _ := os.LookupEnv("POSTGRES_HOST")
+	url, _ := os.LookupEnv("POSTGRES_URL")
 
-	db, err := InitPgDb(context.Background(), host, cfg.User, cfg.Password, port, cfg.Name, 5, 10)
+	if len(url) == 0 {
+		port, _ := os.LookupEnv("POSTGRES_PORT")
+		host, _ := os.LookupEnv("POSTGRES_HOST")
+
+		url = GetConnectionUrl(host, cfg.User, cfg.Password, port, cfg.Name)
+	}
+
+	fmt.Printf("Ready for connect to %s\n", url)
+
+	db, err := InitPgDb(context.Background(), url, 5, 10)
 	if err != nil {
+		fmt.Printf("failed to connect\n")
 		log.Fatal(err)
 	}
 
 	db.Close()
+
+	fmt.Print("Succesfully connected\n")
 }
 
 func InitPgDb(
-	ctx context.Context, host, user, password, port, dbName string,
+	ctx context.Context, url string,
 	openConn, maxOpenConn int,
 ) (*sql.DB, error) {
-	connString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		url.QueryEscape(user),
-		url.QueryEscape(password),
-		host,
-		port,
-		dbName,
-	)
-
-	db, err := sql.Open("pgx", connString)
+	db, err := sql.Open("pgx", url)
 	if err != nil {
-		return nil, errors.Wrapf(err, "connect to db %s", host)
+		return nil, errors.Wrapf(err, "connect to db %s", url)
 	}
 
 	db.SetMaxIdleConns(openConn)
@@ -60,10 +62,19 @@ func InitPgDb(
 
 	err = db.PingContext(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "ping db %s", dbName)
+		return nil, errors.Wrapf(err, "ping db %s", url)
 	}
 
-	// logger.Logger().Infof("connect to PG established: [%s].[%s]", host, dbName)
-
 	return db, nil
+}
+
+func GetConnectionUrl(host, user, password, port, dbName string) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		url.QueryEscape(user),
+		url.QueryEscape(password),
+		host,
+		port,
+		dbName,
+	)
 }

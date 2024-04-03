@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/helpers"
 	"testcontainers/tests/storage"
+
+	"github.com/stretchr/testify/suite"
 )
 
 const (
@@ -26,7 +27,7 @@ type KafkaTests struct {
 func (*KafkaTests) SetupSuite() {
 	fixtures.KafkaInit()
 	fixtures.PostgresInit(fixtures.PostgresConfig{
-		Name:     "users",
+		DbName:   "users",
 		User:     "user",
 		Password: "password",
 	})

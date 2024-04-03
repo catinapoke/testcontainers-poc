@@ -5,9 +5,10 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
 	"testcontainers/tests/fixtures"
 	"testcontainers/tests/storage"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type PGTests struct {
@@ -16,7 +17,7 @@ type PGTests struct {
 
 func (*PGTests) SetupTest() {
 	fixtures.PostgresInit(fixtures.PostgresConfig{
-		Name:     "users",
+		DbName:   "users",
 		User:     "user",
 		Password: "password",
 	})
