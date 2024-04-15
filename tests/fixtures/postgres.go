@@ -55,11 +55,6 @@ func PostgresInit(cfg PostgresConfig) {
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
 				WithStartupTimeout(5*time.Second),
-			helpers.WaitForSQL{
-				UrlFromPort: cfg.urlFromPort,
-				Driver:      "pgx",
-				Port:        cfg.Port,
-			},
 		),
 	)
 

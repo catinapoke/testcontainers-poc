@@ -6,6 +6,7 @@ import (
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/kafka"
+	"github.com/testcontainers/testcontainers-go/network"
 )
 
 var KafkaContainer *kafka.KafkaContainer
@@ -17,6 +18,7 @@ func KafkaInit() {
 	KafkaContainer, err = kafka.RunContainer(ctx,
 		kafka.WithClusterID("test-cluster"),
 		testcontainers.WithImage("confluentinc/confluent-local:7.5.0"),
+		network.WithNetwork([]string{"kafka"}, Network),
 	)
 	if err != nil {
 		log.Fatalf("failed to start container: %s", err)

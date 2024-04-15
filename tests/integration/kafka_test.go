@@ -3,7 +3,10 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,30 +15,46 @@ import (
 	"testcontainers/tests/storage"
 
 	"github.com/stretchr/testify/suite"
+	"github.com/testcontainers/testcontainers-go"
 )
 
 const (
 	topic   = "jeppa"
 	key     = "hui"
 	message = "bolshoy"
+
+	topic_in  = "pizza"
+	topic_out = "cardboard"
 )
 
 type KafkaTests struct {
 	suite.Suite
 }
 
-func (*KafkaTests) SetupSuite() {
+func (tests *KafkaTests) SetupSuite() {
+	fixtures.NetworkInit()
 	fixtures.KafkaInit()
 	fixtures.PostgresInit(fixtures.PostgresConfig{
 		DbName:   "users",
 		User:     "user",
 		Password: "password",
 	})
+
+	brokers, err := fixtures.KafkaContainer.Brokers(context.TODO())
+	if err != nil {
+		tests.FailNow("failed to get brokers", err)
+	}
+
+	fixtures.CreateTopic(context.TODO(), brokers, []string{topic_in, topic_out})
+
+	fixtures.InitKafkaTest(strings.Join(brokers, ","), topic_in, topic_out)
 }
 
 func (*KafkaTests) TearDownSuite() {
 	fixtures.KafkaDie()
 	fixtures.PostgresDie()
+	fixtures.KafkaTestDie()
+	fixtures.NetworkDie()
 }
 
 func TestKafkaTests(t *testing.T) {
@@ -98,4 +117,65 @@ func (k *KafkaTests) TestKafkaTestContainer() {
 	fromDB := storage.GetUserByName(ctx, fromKafka.Name)
 
 	k.Suite.Equal(fromKafka, fromDB)
+}
+
+func (k *KafkaTests) TestKafkaConnectivity() {
+	ctx := context.Background()
+
+	// Init
+	brokers, err := fixtures.KafkaContainer.Brokers(ctx)
+	if err != nil {
+		k.FailNow("Get Kafka brokers", err)
+	}
+
+	producer, err := fixtures.InitNativeKafkaProducer("connectivity-producer", strings.Join(brokers, ","), "1", 10)
+	if err != nil {
+		k.FailNow("InitNativeKafkaProducer", err)
+	}
+	defer producer.Close()
+
+	consumer, err := fixtures.InitNativeKafkaConsumer("connectivity-consumer", strings.Join(brokers, ","), "10000")
+	if err != nil {
+		k.FailNow("InitNativeKafkaConsumer", err)
+	}
+	defer consumer.Close()
+
+	// Act
+	msg := helpers.MakeMsg(topic_in, key, "test-input-external")
+
+	err = producer.Produce(&msg, nil)
+	if ok := k.NoError(err, "failed to produce message from external"); !ok {
+		return
+	}
+
+	err = consumer.Subscribe(topic_out, nil)
+	if ok := k.NoError(err, "failed to subscribe to topic from external"); !ok {
+		return
+	}
+
+	result, err := consumer.ReadMessage(time.Second * 3)
+	if ok := k.NoError(err, "failed to read message from external"); !ok {
+		WriteLogs(fixtures.KafkaTestContainer)
+		return
+	}
+
+	// Assert
+	k.Contains(result, msg, "got wrong string")
+}
+
+func WriteLogs(container testcontainers.Container) {
+	reader, err1 := container.Logs(context.Background())
+	defer reader.Close()
+
+	name, err2 := container.Name(context.TODO())
+	if err2 != nil {
+		name = "default"
+	}
+
+	if err1 == nil {
+		data, er := io.ReadAll(reader)
+		if er == nil {
+			fmt.Printf("container %s logs:\n %s", name, string(data))
+		}
+	}
 }
