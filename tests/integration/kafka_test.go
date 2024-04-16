@@ -47,7 +47,7 @@ func (tests *KafkaTests) SetupSuite() {
 
 	fixtures.CreateTopic(context.TODO(), brokers, []string{topic_in, topic_out})
 
-	fixtures.InitKafkaTest(strings.Join(brokers, ","), topic_in, topic_out)
+	fixtures.InitKafkaTest("kafka:9093", topic_in, topic_out) //strings.Join(brokers, ",")
 }
 
 func (*KafkaTests) TearDownSuite() {

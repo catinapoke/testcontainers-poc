@@ -26,7 +26,7 @@ func InitKafkaTest(brokers string, input string, output string) {
 		},
 		WaitingFor: wait.ForLog("start consuming events"),
 		Env: map[string]string{
-			"KAFKA_BROKERS":   "kafka:9093",
+			"KAFKA_BROKERS":   brokers,
 			"KAFKA_TOPIC_IN":  input,
 			"KAFKA_TOPIC_OUT": output,
 		},
