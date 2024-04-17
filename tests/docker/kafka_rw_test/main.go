@@ -24,12 +24,19 @@ func main() {
 	input_topic, _ := os.LookupEnv("KAFKA_TOPIC_IN")
 	output_topic, _ := os.LookupEnv("KAFKA_TOPIC_OUT")
 
+	log.Printf("Got brokers: %v\n", brokers)
+	log.Printf("Got input topic: %v\n", input_topic)
+	log.Printf("Got output topic: %v\n", output_topic)
+
 	consumer, err := InitNativeKafkaConsumer(client, brokers, group)
 	if err != nil {
 		log.Fatal(fmt.Errorf("failed to start kafka consumer: %w", err))
 	}
 
 	defer consumer.Close()
+
+	meta, err := consumer.GetMetadata(nil, true, 1000)
+	log.Printf("Metadata: %#+v, %v", meta, err)
 
 	producer, err := InitNativeKafkaProducer(client, brokers, "1", 30000)
 	if err != nil {
@@ -54,10 +61,11 @@ func StartConsuming(ctx context.Context, consumer *kafka.Consumer, producer *kaf
 	run := true
 
 	for run {
-		msg, err := consumer.ReadMessage(time.Millisecond * 250)
+		msg, err := consumer.ReadMessage(time.Second * 1)
 		if err != nil {
 			kErr, ok := err.(kafka.Error)
 			if ok && kErr.IsTimeout() {
+				log.Println(fmt.Errorf("read timeout: %w", kErr))
 				continue
 			}
 
