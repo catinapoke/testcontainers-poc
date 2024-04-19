@@ -48,7 +48,7 @@ func (tests *KafkaTests) SetupSuite() {
 	fixtures.CreateTopic(context.TODO(), brokers, []string{topic_in, topic_out})
 
 	// brokers_str := strings.Replace(strings.Join(brokers, ","), "localhost", "172.28.200.12", 1)
-	fixtures.InitKafkaTest("kafka:9095", topic_in, topic_out) // strings.Replace(strings.Join(brokers, ","), "localhost", "172.28.200.12", 1)
+	fixtures.InitKafkaTest("kafka:9092", topic_in, topic_out) // strings.Replace(strings.Join(brokers, ","), "localhost", "172.28.200.12", 1)
 }
 
 func (*KafkaTests) TearDownSuite() {
@@ -142,7 +142,8 @@ func (k *KafkaTests) TestKafkaConnectivity() {
 	defer consumer.Close()
 
 	// Act
-	msg := helpers.MakeMsg(topic_in, key, "test-input-external")
+	text_msg := "test-input-external"
+	msg := helpers.MakeMsg(topic_in, key, text_msg)
 
 	err = producer.Produce(&msg, nil)
 	if ok := k.NoError(err, "failed to produce message from external"); !ok {
@@ -161,7 +162,7 @@ func (k *KafkaTests) TestKafkaConnectivity() {
 	}
 
 	// Assert
-	k.Contains(result, msg, "got wrong string")
+	k.Contains(string(result.Value), text_msg, "got wrong string")
 }
 
 func WriteLogs(container testcontainers.Container) {
